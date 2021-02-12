@@ -48,7 +48,7 @@ public class SimpleParserX {
      *  to be left on the stack).
      */
     abstract private static class ExpNode {
-        abstract double value(); 
+        abstract double value(double xValue); 
         abstract void printStackCommands();
     }
 
@@ -56,14 +56,14 @@ public class SimpleParserX {
      * Represents an expression node that holds a variable
      */
     private static class VariableNode extends ExpNode {
-    	double value() {
-    		return 1;
+    	VariableNode() {
+    		// do nothing
     	}
     	double value(double xValue) {
     		return xValue;
     	}
     	void printStackCommands() {
-    		System.out.println(" Push X = ");
+    		System.out.println(" Push X ");
     	}
     	
     } // end VariableNode class
@@ -77,7 +77,7 @@ public class SimpleParserX {
                 // Construct a ConstNode containing the specified number.
             number = val;
         }
-        double value() {
+        double value(double xValue) {
                 // The value of the node is the number that it contains.
             return number;
         }
@@ -103,11 +103,11 @@ public class SimpleParserX {
             this.left = left;
             this.right = right;
         }
-        double value() {
+        double value(double xValue) {
                 // The value is obtained by evaluating the left and right
                 // operands and combining the values with the operator.
-            double x = left.value();
-            double y = right.value();
+            double x = left.value(xValue);
+            double y = right.value(xValue);
             switch (op) {
             case '+':  return x + y;
             case '-':  return x - y;
@@ -139,9 +139,9 @@ public class SimpleParserX {
             assert operand != null;
             this.operand = operand;
         }
-        double value() {
+        double value(double xValue) {
                 // The value is the negative of the value of the operand.
-            double neg = operand.value();
+            double neg = operand.value(xValue);
             return -neg;
         }
         void printStackCommands() {
@@ -183,7 +183,8 @@ public class SimpleParserX {
                 if ( TextIO.peek() != '\n' )
                     throw new ParseError("Extra data after end of expression.");
                 TextIO.getln();
-                System.out.println("\nValue is " + exp.value());
+                for (double xValue = 0.0; xValue < 3.9; xValue ++)
+                	System.out.println("\nValue (x = " + xValue + " ) is " + exp.value(xValue));
                 System.out.println("\nOrder of postfix evaluation is:\n");
                 exp.printStackCommands();
             }
@@ -271,7 +272,8 @@ public class SimpleParserX {
         }
         else if ( Character.toLowerCase(ch) == 'x') {
         	// The factor is an x-variable - return a variable node
-        	return new VariableNode();
+            TextIO.getAnyChar();  // Read the "x"
+            return new VariableNode();
         }
         else if ( ch == '(' ) {
                 // The factor is an expression in parentheses.
