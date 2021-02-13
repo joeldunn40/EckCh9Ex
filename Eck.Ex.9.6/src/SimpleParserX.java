@@ -1,6 +1,8 @@
 import textio.TextIO;
 
 /**
+ * Eck Exercise 9.6
+ * 
  * COPIED FROM ECK SIMPLEPARSER3:
  * Added variable x as an expression node
  * Main evaluates at x=0,1,2,3
