@@ -77,7 +77,7 @@ public class SimpleParserDx {
 		}
 		ExpNode derivative() {
 			// TODO Auto-generated method stub
-			return null;
+			return new ConstNode(1.0);
 		}
     	
     } // end VariableNode class
@@ -104,7 +104,7 @@ public class SimpleParserDx {
 		}
 		ExpNode derivative() {
 			// TODO Auto-generated method stub
-			return null;
+			return new ConstNode(0.0);
 		}
 
     }
@@ -137,7 +137,31 @@ public class SimpleParserDx {
             case '/':  return x / y;
             default:   return Double.NaN;  // Bad operator!
             }
+            
         }
+		ExpNode derivative() {
+			// TODO Auto-generated method stub
+			ExpNode A = this.left;
+			ExpNode B = this.right;
+			ExpNode dA = this.left.derivative();
+			ExpNode dB = this.right.derivative();
+			switch (op) {
+			case '+': return new BinOpNode('+',dA,dB);
+			case '-': return new BinOpNode('-',dA,dB);
+			case '*':
+				BinOpNode t1m = new BinOpNode('*',A,dB);
+				BinOpNode t2m = new BinOpNode('*',dA,B);
+				return new BinOpNode('+',t1m,t2m);
+			case '/': 
+				BinOpNode t1d = new BinOpNode('*',A,dB);
+				BinOpNode t2d = new BinOpNode('*',dA,B);
+				BinOpNode t3d = new BinOpNode('-',t1d,t2d);
+				BinOpNode t4d = new BinOpNode('*',B,B);
+				return new BinOpNode('/',t3d,t4d);
+			default: return null; // Bad operator!
+			}
+		}
+
         void  printStackCommands() {
                 // To evaluate the expression on a stack machine, first do
                 // whatever is necessary to evaluate the left operand, leaving
@@ -155,11 +179,6 @@ public class SimpleParserDx {
 			right.printInFix();
 			System.out.print(")");
 		}
-		ExpNode derivative() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
     }
 
 
@@ -192,8 +211,8 @@ public class SimpleParserDx {
 			System.out.print(")");
 		}
 		ExpNode derivative() {
-			// TODO Auto-generated method stub
-			return null;
+//            return new ConstNode(-1.0);
+            return new UnaryMinusNode(operand.derivative());
 		}
 
     }
@@ -227,12 +246,16 @@ public class SimpleParserDx {
                 if ( TextIO.peek() != '\n' )
                     throw new ParseError("Extra data after end of expression.");
                 TextIO.getln();
-                for (double xValue = 0.0; xValue < 3.9; xValue ++)
+                for (double xValue = 0.0; xValue < 3.9; xValue ++) {
                 	System.out.println("\nValue (x = " + xValue + " ) is " + exp.value(xValue));
+                	System.out.println("Derivative (x = " + xValue + " ) is " + exp.derivative().value(xValue));
+                }
 //                System.out.println("\nOrder of postfix evaluation is:\n");
 //                exp.printStackCommands();
-                System.out.println("\nOrder of in-fix evaluation is:\n");
+                System.out.println("\nIn-fix equation is:\n");
                 exp.printInFix();
+                System.out.println("\nDerivative is:\n");
+                exp.derivative().printInFix();
             }
             catch (ParseError e) {
                 System.out.println("\n*** Error in input:    " + e.getMessage());
